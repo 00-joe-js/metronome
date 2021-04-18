@@ -96,15 +96,34 @@ window.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    const squares = {
+        wholeNote: document.querySelector("#see-1st"),
+        halfNote: document.querySelector("#see-2nd"),
+        quarterNote: document.querySelector("#see-4th"),
+        eightNote: document.querySelector("#see-8th"),
+        sixteenthNote: document.querySelector("#see-16th"),
+    };
+
     ticker.onTick((whichTick) => {
         if (whichTick === 1) {
             console.log("Whole note");
+            squares.wholeNote.style.opacity = 1;
+            setTimeout(() => {
+                squares.wholeNote.style.opacity = 0;
+            }, 200);
         }
         if (whichTick % 16 === 1) {
             console.log("Quarter note");
+            squares.quarterNote.style.opacity = 1;
+            setTimeout(() => {
+                squares.quarterNote.style.opacity = 0;
+            }, 200);
         }
-        if (whichTick % 32 === 1) {
-            console.log("Half note");
+        if (whichTick % 4 === 1) {
+            squares.sixteenthNote.style.opacity = 1;
+            setTimeout(() => {
+                squares.sixteenthNote.style.opacity = 0;
+            }, 100);
         }
     });
 
