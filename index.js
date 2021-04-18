@@ -9,6 +9,7 @@ class Ticking {
         this.bpm = bpm;
         this.tickListeners = [];
         this.playStateListeners = [];
+        this.currentTickPosition = 1;
         if (start) {
             this.startPlaying();
         }
@@ -19,8 +20,14 @@ class Ticking {
     }
     startPlaying() {
         this.currentTicking = setInterval(() => {
-            this.tickListeners.forEach(l => l());
-        }, Ticking.bpmToMilliseconds(this.bpm));
+            const infoForThisTick = Ticking.formTickInfo(this.currentTickPosition);
+            this.tickListeners.forEach(l => l(this.currentTickPosition, infoForThisTick));
+            if (this.currentTickPosition === 64) {
+                this.currentTickPosition = 1;
+            } else {
+                this.currentTickPosition = this.currentTickPosition + 1;
+            }
+        }, Ticking.quarterNoteBPMTo64WholeNoteSubdivisions(this.bpm));
         this.playStateListeners.forEach(l => l(true));
     }
     stopPlaying() {
@@ -44,6 +51,29 @@ class Ticking {
         const amountOfMillisecondsInAMinute = 1000 * 60;
         return amountOfMillisecondsInAMinute / bpmValue;
     }
+    static quarterNoteBPMTo64WholeNoteSubdivisions(bpmValue) {
+        const msForQuarterNote = Ticking.bpmToMilliseconds(bpmValue);
+        const wholeNoteMs = msForQuarterNote * 4;
+        return wholeNoteMs / 64;
+    }
+    static tickInfos = {};
+    static formTickInfo(tickPosition) {
+        if (Ticking.tickInfos[tickPosition]) return Ticking.tickInfos[tickPosition];
+        const t = tickPosition;
+        const isQuarterNote = t % 16 === 1;
+        const output = {
+            isWholeNote: t === 1,
+            isHalfNote: t % 32 === 1,
+            isQuarterNote,
+            whichQuarterNote: isQuarterNote ? Math.ceil(t / 16) : null,
+            isEightNote: t % 8 === 1,
+            isSixteenthNote: t % 4 === 1,
+            is32ndNote: t % 2 === 1,
+            is64thNote: true,
+        };
+        Ticking.tickInfos[tickPosition] = output;
+        return output;
+    }
 }
 
 
@@ -60,8 +90,22 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const ticker = new Ticking(60);
 
-    ticker.onTick(() => {
-        playClick();
+    ticker.onTick((whichTick) => {
+        if (whichTick % 16 === 1) {
+            playClick();
+        }
+    });
+
+    ticker.onTick((whichTick) => {
+        if (whichTick === 1) {
+            console.log("Whole note");
+        }
+        if (whichTick % 16 === 1) {
+            console.log("Quarter note");
+        }
+        if (whichTick % 32 === 1) {
+            console.log("Half note");
+        }
     });
 
     ticker.onPlayChange((isPlaying) => {
