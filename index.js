@@ -12,6 +12,11 @@ class Ticking {
             this.startPlaying();
         }
     }
+    setBPM(newBpm) {
+        this.bpm = newBpm;
+        this.stopPlaying();
+        this.startPlaying();
+    }
     startPlaying() {
         this.currentTicking = setInterval(() => {
             this.tickListeners.forEach(l => l());
@@ -36,33 +41,34 @@ class Ticking {
 
 window.addEventListener("DOMContentLoaded", () => {
 
-    const audio = new Audio("drumsticks.wav");
+    const audio = new Audio("https://freewavesamples.com/files/Cowbell-2.wav");
     const playClick = () => {
         audio.play();
-        setTimeout(() => {
-            audio.pause();
-            audio.currentTime = 0;
-        }, 800);
     };
 
+    const bpmDisplay = document.querySelector("#current-bpm-value");
+    const bpmSlider = document.querySelector("#bpm-slider");
     const playButton = document.querySelector("#play-button");
 
-    playButton.addEventListener("click", () => {
+    const ticker = new Ticking(60);
 
-        const ticker = new Ticking(30);
-
-        ticker.onTick(() => {
-            playClick();
-        });
-
-        ticker.onTick(() => {
-            console.count("tick!");
-        });
-
-        ticker.startPlaying();
-
+    ticker.onTick(() => {
+        playClick();
     });
 
+    ticker.onTick(() => {
+        console.count("tick!");
+    });
+
+    playButton.addEventListener("click", () => {
+        ticker.startPlaying();
+    });
+
+    bpmSlider.addEventListener("change", () => {
+        const bpmValue = bpmSlider.value;
+        bpmDisplay.innerHTML = bpmValue;
+        ticker.setBPM(parseInt(bpmValue, 10));
+    });
 
 });
 
