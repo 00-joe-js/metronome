@@ -14,8 +14,10 @@ class Ticking {
     }
     setBPM(newBpm) {
         this.bpm = newBpm;
-        this.stopPlaying();
-        this.startPlaying();
+        if (this.currentTicking !== null) {
+            this.stopPlaying();
+            this.startPlaying();
+        }
     }
     startPlaying() {
         this.currentTicking = setInterval(() => {

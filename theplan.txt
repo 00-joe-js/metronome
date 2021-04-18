@@ -4,4 +4,13 @@
 
     Producing an audible click every second CHECKED
 
+    Play controls
+        - stopping*
+
     Setting BPM which allows ticks to play at a certain rate
+        - allow people to fine tune the set bpm
+        - TAP feature
+
+    Accents
+        - different sound on the one*
+        - configurable accenting
