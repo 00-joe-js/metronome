@@ -8,28 +8,34 @@ class Ticking {
         this.currentTicking = null;
         this.bpm = bpm;
         this.tickListeners = [];
+        this.playStateListeners = [];
         if (start) {
             this.startPlaying();
         }
     }
     setBPM(newBpm) {
         this.bpm = newBpm;
-        if (this.currentTicking !== null) {
-            this.stopPlaying();
-            this.startPlaying();
-        }
+        this.stopPlaying();
     }
     startPlaying() {
         this.currentTicking = setInterval(() => {
             this.tickListeners.forEach(l => l());
         }, Ticking.bpmToMilliseconds(this.bpm));
+        this.playStateListeners.forEach(l => l(true));
     }
     stopPlaying() {
         clearInterval(this.currentTicking);
         this.currentTicking = null;
+        this.playStateListeners.forEach(l => l(false));
+    }
+    isPlaying() {
+        return this.currentTicking !== null;
     }
     onTick(listener) {
         this.tickListeners.push(listener);
+    }
+    onPlayChange(listener) {
+        this.playStateListeners.push(listener);
     }
     static bpmToMilliseconds(bpmValue) {
         // 60bpm -> 1 beat every second 
@@ -50,7 +56,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const bpmDisplay = document.querySelector("#current-bpm-value");
     const bpmSlider = document.querySelector("#bpm-slider");
-    const playButton = document.querySelector("#play-button");
+    const playControlButton = document.querySelector("#play-control-button");
 
     const ticker = new Ticking(60);
 
@@ -58,12 +64,20 @@ window.addEventListener("DOMContentLoaded", () => {
         playClick();
     });
 
-    ticker.onTick(() => {
-        console.count("tick!");
+    ticker.onPlayChange((isPlaying) => {
+        if (isPlaying) {
+            playControlButton.innerHTML = "Pause";
+        } else {
+            playControlButton.innerHTML = "Play";
+        }
     });
 
-    playButton.addEventListener("click", () => {
-        ticker.startPlaying();
+    playControlButton.addEventListener("click", () => {
+        if (ticker.isPlaying()) {
+            ticker.stopPlaying();
+        } else {
+            ticker.startPlaying();
+        }
     });
 
     bpmSlider.addEventListener("change", () => {
